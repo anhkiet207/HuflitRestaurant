@@ -1,0 +1,35 @@
+﻿@{
+    ViewBag.Title = "Đăng nhập - HUFLIT RESTAURANT";
+}
+
+<div class="order-detail-container" style="max-width: 450px; margin: 40px auto;">
+    <h1 class="admin-title-main" style="text-align: center;">ĐĂNG NHẬP</h1>
+
+    @if (ViewBag.Error != null)
+    {
+        <div style="background-color: #FEE2E2; color: #991B1B; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-size: 14px;">
+            &#10071; @ViewBag.Error
+        </div>
+    }
+
+    <div class="order-info-card">
+        @using (Html.BeginForm("Login", "Account", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="checkout-field-group">
+                <label class="checkout-field-label">Email</label>
+                <input type="email" name="email" class="checkout-input-custom" placeholder="Nhập địa chỉ email..." required />
+            </div>
+
+            <div class="checkout-field-group">
+                <label class="checkout-field-label">Mật khẩu</label>
+                <input type="password" name="password" class="checkout-input-custom" placeholder="Nhập mật khẩu..." required />
+            </div>
+
+            <button type="submit" class="btn-submit-side" style="margin-top: 20px; width: 100%;">
+                ĐĂNG NHẬP
+            </button>
+        }
+    </div>
+</div>

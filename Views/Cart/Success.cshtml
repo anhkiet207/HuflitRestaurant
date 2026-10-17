@@ -1,0 +1,37 @@
+﻿@{
+    ViewBag.Title = "Đặt hàng thành công";
+    var order = ViewBag.Order as HuflitRestaurant.Models.Order;
+    string pttt = ViewBag.PTTT;
+    string qrUrl = ViewBag.QrCodeUrl;
+    string addInfo = ViewBag.AddInfo;
+}
+
+<div class="container-site section auth-container" style="max-width: 550px; text-align: center;">
+    <h1 style="color: var(--success); margin-bottom: 10px;">ĐẶT HÀNG THÀNH CÔNG!</h1>
+    <p>Cảm ơn bạn đã đặt món tại <strong>HUFLIT RESTAURANT</strong>.</p>
+    <p>Mã đơn hàng của bạn là: <strong style="color: var(--primary);">#@order.Id</strong></p>
+
+    @if (pttt == "ChuyenKhoan")
+    {
+        <div style="background: #F9FAFB; border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 20px;">
+            <h3 style="margin-top: 0; color: #1F2937;">QUÉT MÃ QR ĐỂ THANH TOÁN</h3>
+            <p style="font-size: 13px; color: #6B7280; margin-bottom: 12px;">Mở ứng dụng Ngân hàng hoặc Ví điện tử (Momo, ZaloPay) để quét mã:</p>
+
+            <img src="@qrUrl" alt="Mã QR Thanh Toán" style="width: 240px; height: auto; border: 1px solid #E5E7EB; border-radius: 8px; padding: 6px; background: #fff;" />
+
+            <div style="text-align: left; font-size: 13px; margin-top: 14px; line-height: 1.6;">
+                <p style="margin: 4px 0;"><strong>Số tiền:</strong> <span style="color: var(--primary); font-weight: bold;">@(order.TongTien.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))) ₫</span></p>
+                <p style="margin: 4px 0;"><strong>Nội dung CK:</strong> <span style="background: #FEF3C7; padding: 2px 6px; border-radius: 4px; font-weight: bold;">@addInfo</span></p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p style="margin-top: 16px; color: #4B5563;">Đơn hàng của bạn sẽ được giao và thu tiền tận nơi (COD).</p>
+    }
+
+    <div style="margin-top: 24px;">
+        <a href="@Url.Action("Index", "Product")" class="btn-red">Tiếp tục mua hàng</a>
+        <a href="@Url.Action("Profile", "Account")" class="btn-red" style="background: #4B5563; margin-left: 8px;">Xem đơn hàng</a>
+    </div>
+</div>

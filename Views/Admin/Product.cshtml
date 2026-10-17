@@ -1,0 +1,85 @@
+﻿@model IEnumerable<HuflitRestaurant.Models.Product>
+
+@{
+    ViewBag.Title = "Quản lý thực đơn món ăn - HUFLIT RESTAURANT";
+}
+
+<div class="product-manage-container">
+    <h1 class="admin-title-main">QUẢN LÝ THỰC ĐƠN MÓN ĂN</h1>
+
+    <div class="admin-action-bar">
+        <div style="display: flex; gap: 10px;">
+            <a href="@Url.Action("CreateProduct", "Admin")" class="btn-admin-menu" style="background-color: #E53935;">+ Thêm món ăn mới</a>
+            <a href="@Url.Action("Orders", "Admin")" class="btn-admin-reset" style="text-decoration: none;">Quản lý đơn hàng</a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="admin-alert-success" style="margin-top: 15px;">
+            &#10004; @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="product-table-wrapper">
+        <table class="product-manage-table">
+            <thead>
+                <tr>
+                    <th style="width: 80px; text-align: center;">Hình ảnh</th>
+                    <th>Tên món</th>
+                    <th>Danh mục</th>
+                    <th class="text-right">Giá bán</th>
+                    <th style="text-align: center;">Trạng thái</th>
+                    <th style="text-align: center;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td style="text-align: center;">
+                                <img src="@Url.Content(string.IsNullOrEmpty(item.HinhAnh) ? "~/Content/images/no-image.png" : item.HinhAnh)"
+                                     alt="@item.Ten"
+                                     class="product-img-thumb" />
+                            </td>
+                            <td><strong>@item.Ten</strong></td>
+                            <td>@(item.Category != null ? item.Category.Ten : "Chưa phân loại")</td>
+                            <td class="text-right" style="font-weight: 700; color: #E53935;">
+                                @item.Gia.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) đ
+                            </td>
+                            <td style="text-align: center;">
+                                @if (item.DangBan)
+                                {
+                                    <span class="badge-status badge-active">Đang bán</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status badge-inactive">Ngừng bán</span>
+                                }
+                            </td>
+                            <td style="text-align: center;">
+                                @using (Html.BeginForm("DeleteProduct", "Admin", new { id = item.Id }, FormMethod.Post, new { style = "display:inline;" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-delete-product" onclick="return confirm('Bạn có chắc chắn muốn xóa món [@item.Ten] không?');">
+                                        Xóa
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #6B7280;">
+                            Chưa có món ăn nào trong thực đơn.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

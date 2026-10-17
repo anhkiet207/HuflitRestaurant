@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - HUFLIT RESTAURANT</title>
+    <link rel="icon" type="image/svg+xml" href="@Url.Content("~/Content/images/favicon.svg")?v=1" />
+    <link rel="apple-touch-icon" href="@Url.Content("~/Content/images/favicon.svg")?v=1" />
+    <meta name="theme-color" content="#E53935" />
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <header class="site-header">
+        <div class="container-site header-inner">
+            <a class="logo" href="@Url.Action("Index", "Home")"><span class="logo-red">HUFLIT</span> RESTAURANT</a>
+
+            <nav class="main-nav">
+                <a href="@Url.Action("Index", "Home")">Trang Chủ</a>
+                <a href="@Url.Action("Index", "Product")">Thực Đơn</a>
+                <a href="@Url.Action("About", "Home")">Về Chúng Tôi</a>
+                <a href="@Url.Action("Index", "Cart")">Giỏ hàng (<span id="cart-count">@(Session["CartCount"] ?? 0)</span>)</a>
+            </nav>
+
+            <div class="header-user">
+                @if (Session["UserId"] != null)
+                {
+                    <a class="user-name" href="@Url.Action("Profile", "Account")">@Session["UserName"]</a>
+
+                    @* Nếu là Admin -> Hiển thị nút Quản trị & Chăm sóc khách hàng *@
+                    if (Session["UserRole"] != null && Session["UserRole"].ToString() == "Admin")
+                    {
+                        <a class="btn-red" href="@Url.Action("Orders", "Admin")" style="background: #374151;">Quản trị</a>
+                        <a href="@Url.Action("Chat", "Admin")" class="btn-red" style="background: #2563EB;">Chăm sóc KH</a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("CustomerSupport", "Account")" class="btn-red" style="background: #2563EB;">Hỗ trợ</a>
+                    }
+
+                    <a class="btn-red" href="@Url.Action("Logout", "Account")">Đăng xuất</a>
+                }
+                else
+                {
+                    <a class="btn-outline" href="@Url.Action("Register", "Account")">Đăng ký</a>
+                    <a class="btn-red" href="@Url.Action("Login", "Account")">Đăng nhập</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <main class="site-main">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="container-site">
+            Tên nhà hàng: HUFLIT RESTAURANT<br />
+            Địa chỉ: 123 Đường ABC, Quận X, TP.HCM<br />
+            Hotline: 0363420862
+        </div>
+    </footer>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    document.addEventListener('click', function (e) {
+                                        var btn = e.target.closest('.btn-add-cart');
+                                        if (btn) {
+                                            e.preventDefault();
+                                            var productId = btn.getAttribute('data-id');
+
+                                            fetch('/Cart/AddToCart', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                                },
+                                                body: 'id=' + encodeURIComponent(productId) + '&quantity=1'
+                                            })
+                                            .then(function (res) { return res.json(); })
+                                            .then(function (data) {
+                                                if (data && data.success) {
+                                                    var cartCountElem = document.getElementById('cart-count');
+                                                    if (cartCountElem) {
+                                                        cartCountElem.innerText = data.cartCount;
+                                                    }
+                                                    alert('Đã thêm món vào giỏ hàng thành công!');
+                                                }
+                                            })
+                                            .catch(function () {
+                                                alert('Có lỗi xảy ra, vui lòng thử lại!');
+                                            });
+                                        }
+                                    });
+                                });
+    </script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

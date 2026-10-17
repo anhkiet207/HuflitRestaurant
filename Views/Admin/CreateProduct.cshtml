@@ -1,0 +1,63 @@
+﻿@model HuflitRestaurant.Models.Product
+
+@{
+    ViewBag.Title = "Thêm món ăn mới - HUFLIT RESTAURANT";
+    var categories = ViewBag.Categories as List<HuflitRestaurant.Models.Category>;
+}
+
+<div class="admin-orders-container" style="max-width: 600px;">
+    <div class="admin-action-bar">
+        <h1 class="admin-title-main" style="margin: 0;">THÊM MÓN ĂN MỚI</h1>
+        <a href="@Url.Action("Orders", "Admin")" class="btn-admin-reset" style="text-decoration: none;">&larr; Quay lại</a>
+    </div>
+
+    <div class="order-info-card">
+        @using (Html.BeginForm("CreateProduct", "Admin", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="checkout-field-group">
+                <label class="checkout-field-label">Tên món ăn</label>
+                <input type="text" name="Ten" class="checkout-input-custom" placeholder="Nhập tên món ăn..." required />
+            </div>
+
+            <div class="checkout-field-group">
+                <label class="checkout-field-label">Danh mục món ăn</label>
+                <select name="CategoryId" class="checkout-input-custom" required>
+                    <option value="">-- Chọn danh mục --</option>
+                    @if (categories != null)
+                    {
+                        foreach (var cat in categories)
+                        {
+                            <option value="@cat.Id">@cat.Ten</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="checkout-field-group">
+                <label class="checkout-field-label">Đơn giá (VNĐ)</label>
+                <input type="number" name="Gia" class="checkout-input-custom" placeholder="Ví dụ: 40000" required />
+            </div>
+
+            <div class="checkout-field-group">
+                <label class="checkout-field-label">Đường dẫn hình ảnh (VD: ~/Content/images/tokbokki.jpg)</label>
+                <input type="text" name="HinhAnh" class="checkout-input-custom" placeholder="Nhập đường dẫn ảnh..." required />
+            </div>
+
+            <button type="submit" class="btn-submit-side" style="margin-top: 20px;">
+                THÊM MÓN ĂN
+            </button>
+            <div class="form-group mb-3">
+                <label class="font-weight-bold">Chỉnh góc hiển thị ảnh (Cho món bị lệch):</label>
+                <select name="ViTriAnh" class="form-control">
+                    <option value="center 30%">1. Mặc định (Cân đối chuẩn - center 30%)</option>
+                    <option value="center 20%">2. Đẩy đĩa ăn lên trên nhiều (Dành cho món gà bị lọt sâu)</option>
+                    <option value="center 10%">3. Đẩy đĩa ăn lên tối đa</option>
+                    <option value="center 50%">4. Chính giữa tâm (center 50%)</option>
+                    <option value="center 70%">5. Kéo đĩa ăn xuống dưới</option>
+                </select>
+            </div>
+        }
+    </div>
+</div>

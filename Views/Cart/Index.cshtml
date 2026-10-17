@@ -1,0 +1,79 @@
+﻿@model HuflitRestaurant.Models.CartViewModel
+
+@{
+    ViewBag.Title = "Giỏ hàng - HUFLIT RESTAURANT";
+}
+
+<div class="cart-container-custom">
+    <h1 class="cart-title-custom">GIỎ HÀNG CỦA BẠN</h1>
+
+    @if (Model != null && Model.Items != null && Model.Items.Any())
+    {
+        <div class="cart-layout-custom">
+            <!-- Cột trái: Bảng món ăn -->
+            <div class="cart-table-wrapper">
+                <table class="cart-table-custom">
+                    <thead>
+                        <tr>
+                            <th>Món ăn</th>
+                            <th>Đơn giá</th>
+                            <th>Số lượng</th>
+                            <th>Thành tiền</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="cart-item-info">
+                                        <img src="@Url.Content(item.HinhAnh)" alt="@item.Ten" class="cart-item-img" onerror="this.onerror=null; this.src='https://via.placeholder.com/70';" />
+                                        <span class="cart-item-name">@item.Ten</span>
+                                    </div>
+                                </td>
+                                <td>@item.Gia.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) ₫</td>
+                                <td>
+                                    <input type="number" value="@item.SoLuong" min="1" class="qty-input" />
+                                </td>
+                                <td><strong>@((item.Gia * item.SoLuong).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN"))) ₫</strong></td>
+                                <td>
+                                    <a href="@Url.Action("RemoveFromCart", "Cart", new { id = item.ProductId })"
+                                       class="btn-delete-item"
+                                       onclick="return confirm('Bạn có chắc muốn xóa món này khỏi giỏ hàng?');">
+                                        Xóa
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Cột phải: Tóm tắt đơn hàng -->
+            <div class="cart-summary-box">
+                <h3 class="summary-title">TÓM TẮT ĐƠN HÀNG</h3>
+                <div class="summary-row">
+                    <span>Tạm tính:</span>
+                    <span>@Model.Items.Sum(x => x.Gia * x.SoLuong).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) ₫</span>
+                </div>
+                <div class="summary-row">
+                    <span>Phí vận chuyển:</span>
+                    <span>Miễn phí</span>
+                </div>
+                <div class="summary-row summary-row-total">
+                    <span>Tổng cộng:</span>
+                    <span class="summary-total-price">@Model.Items.Sum(x => x.Gia * x.SoLuong).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) ₫</span>
+                </div>
+                <a href="@Url.Action("Checkout", "Cart")" class="btn-checkout-custom">TIẾN HÀNH ĐẶT HÀNG</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div style="text-align: center; padding: 60px 0;">
+            <p style="font-size: 18px; color: #666666; margin-bottom: 20px;">Giỏ hàng của bạn đang trống.</p>
+            <a href="@Url.Action("Index", "Product")" class="btn-checkout-custom" style="display: inline-block; width: auto; padding: 10px 30px;">XEM THỰC ĐƠN NGAY</a>
+        </div>
+    }
+</div>

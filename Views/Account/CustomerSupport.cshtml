@@ -1,0 +1,318 @@
+﻿@model List<HuflitRestaurant.Models.ChatMessage>
+
+@{
+    ViewBag.Title = "Hỗ trợ trực tuyến - HUFLIT RESTAURANT";
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<div class="cs-page">
+    <div class="cs-card">
+
+        <!-- Header -->
+        <div class="cs-header">
+            <div class="cs-header-left">
+                <div class="cs-avatar">HF</div>
+                <div>
+                    <div class="cs-title">Hỗ trợ HUFLIT</div>
+                    <div class="cs-status">Đang hoạt động</div>
+                </div>
+            </div>
+            <a class="cs-header-action" href="tel:0123456789" title="Gọi hotline">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+            </a>
+        </div>
+
+        <!-- Tin nhắn -->
+        <div class="cs-body" id="csBody"></div>
+
+        <div class="cs-error" id="csError"></div>
+
+        <!-- Thanh nhập -->
+        <form id="csForm" class="cs-input-bar" autocomplete="off">
+            @Html.AntiForgeryToken()
+
+            <label for="csFile" class="cs-icon-btn" title="Gửi ảnh hoặc video">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+            </label>
+            <input type="file" id="csFile" accept="image/*,video/*" style="display:none;" />
+
+            <textarea id="csInput" class="cs-input" rows="1" placeholder="Nhập tin nhắn..."></textarea>
+
+            <button type="submit" id="csSend" class="cs-send" title="Gửi (Enter)">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+            </button>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            var URL_LOAD = '@Url.Action("GetCustomerMessagesJson", "Account")';
+            var URL_SEND = '@Url.Action("SendCustomerSupportMessageAjax", "Account")';
+            var URL_MEDIA = '@Url.Action("SendCustomerMediaMessageAjax", "Account")';
+            var MAX_FILE_MB = 4;
+
+            var body = document.getElementById('csBody');
+            var form = document.getElementById('csForm');
+            var input = document.getElementById('csInput');
+            var sendBtn = document.getElementById('csSend');
+            var fileInput = document.getElementById('csFile');
+            var errorBox = document.getElementById('csError');
+
+            var lastCount = -1;
+            var isFirstLoad = true;
+            var waitingAI = false;
+            var sending = false;
+            var audioCtx = null;
+            var errorTimer = null;
+
+            var TYPING_HTML =
+                '<div class="cs-msg admin" id="csTyping">' +
+                '<div class="cs-msg-avatar">HF</div>' +
+                '<div class="cs-msg-col"><div class="cs-bubble cs-typing"><span></span><span></span><span></span></div></div>' +
+                '</div>';
+
+            /* ---------- Tiện ích ---------- */
+            function esc(s) {
+                return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+
+            // Escape trước, rồi mới đổi **đậm**, gạch đầu dòng và xuống dòng (an toàn trước XSS)
+            function formatText(s) {
+                var t = esc(s);
+                t = t.replace(/(^|\n)\s*[\*\-]\s+/g, '$1• ');
+                t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                t = t.replace(/\r?\n/g, '<br>');
+                return t;
+            }
+
+            function scrollBottom() {
+                body.scrollTop = body.scrollHeight;
+            }
+
+            function showError(text) {
+                errorBox.textContent = text;
+                errorBox.classList.add('show');
+                clearTimeout(errorTimer);
+                errorTimer = setTimeout(function () { errorBox.classList.remove('show'); }, 4000);
+            }
+
+            function getToken() {
+                var el = form.querySelector('input[name="__RequestVerificationToken"]');
+                return el ? el.value : '';
+            }
+
+            function autoGrow() {
+                input.style.height = 'auto';
+                input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+            }
+
+            function playSound() {
+                try {
+                    var C = window.AudioContext || window.webkitAudioContext;
+                    if (!C) return;
+                    audioCtx = audioCtx || new C();
+                    var osc = audioCtx.createOscillator();
+                    var gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } catch (e) { }
+            }
+
+            /* ---------- Hiển thị ---------- */
+            function welcomeHtml() {
+                var chips = ['Thực đơn có món gì?', 'Món nào bán chạy?', 'Giờ mở cửa', 'Thanh toán thế nào?'];
+                var html = '<div class="cs-welcome">' +
+                    '<div class="cs-welcome-icon">👋</div>' +
+                    '<h3>Xin chào!</h3>' +
+                    '<p>Mình có thể giúp gì cho bạn hôm nay?</p>' +
+                    '<div class="cs-chips">';
+                chips.forEach(function (q) {
+                    html += '<button type="button" class="cs-chip" data-q="' + esc(q) + '">' + esc(q) + '</button>';
+                });
+                return html + '</div></div>';
+            }
+
+            function renderMessage(msg) {
+                var isUser = msg.SenderRole === 'User';
+                var cls = 'cs-bubble';
+                var inner;
+
+                if (msg.MessageType === 'Image' && msg.MediaUrl) {
+                    inner = '<a href="' + esc(msg.MediaUrl) + '" target="_blank" rel="noopener"><img class="cs-media" src="' + esc(msg.MediaUrl) + '" alt="Hình ảnh" /></a>';
+                    cls += ' media';
+                } else if (msg.MessageType === 'Video' && msg.MediaUrl) {
+                    inner = '<video class="cs-media" src="' + esc(msg.MediaUrl) + '" controls preload="metadata"></video>';
+                    cls += ' media';
+                } else {
+                    inner = formatText(msg.Message);
+                }
+
+                return '<div class="cs-msg ' + (isUser ? 'user' : 'admin') + '">' +
+                    (isUser ? '' : '<div class="cs-msg-avatar">HF</div>') +
+                    '<div class="cs-msg-col">' +
+                    '<div class="' + cls + '">' + inner + '</div>' +
+                    '<span class="cs-time">' + esc(msg.CreatedAt) + '</span>' +
+                    '</div></div>';
+            }
+
+            function render(messages) {
+                body.innerHTML = messages.length === 0
+                    ? welcomeHtml()
+                    : messages.map(renderMessage).join('');
+                scrollBottom();
+            }
+
+            function appendOptimistic(text) {
+                var w = body.querySelector('.cs-welcome');
+                if (w) w.parentNode.removeChild(w);
+
+                var now = new Date();
+                var hh = ('0' + now.getHours()).slice(-2);
+                var mm = ('0' + now.getMinutes()).slice(-2);
+
+                body.insertAdjacentHTML('beforeend', renderMessage({
+                    SenderRole: 'User', Message: text, MessageType: 'Text', CreatedAt: hh + ':' + mm
+                }));
+                body.insertAdjacentHTML('beforeend', TYPING_HTML);
+                scrollBottom();
+            }
+
+            /* ---------- Tải tin nhắn ---------- */
+            function loadMessages(force) {
+                if (waitingAI && !force) return;
+
+                return fetch(URL_LOAD, { credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (!data || !data.success) return;
+
+                        var messages = data.messages || [];
+                        if (!force && messages.length === lastCount) return;
+
+                        var grew = !isFirstLoad && messages.length > lastCount;
+                        var last = messages[messages.length - 1];
+
+                        lastCount = messages.length;
+                        isFirstLoad = false;
+                        render(messages);
+
+                        if (grew && last && last.SenderRole !== 'User') playSound();
+                    })
+                    .catch(function () { });
+            }
+
+            /* ---------- Gửi tin nhắn ---------- */
+            function sendMessage(textOverride) {
+                if (sending) return;
+
+                var text = (textOverride != null ? textOverride : input.value).trim();
+                if (!text) return;
+
+                sending = true;
+                waitingAI = true;
+                sendBtn.disabled = true;
+                input.value = '';
+                autoGrow();
+                appendOptimistic(text);
+
+                var ok = false;
+
+                fetch(URL_SEND, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'message=' + encodeURIComponent(text) + '&__RequestVerificationToken=' + encodeURIComponent(getToken())
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        ok = !!(data && data.success);
+                        if (!ok) showError('Không gửi được tin nhắn. Vui lòng thử lại.');
+                    })
+                    .catch(function () { showError('Mất kết nối. Vui lòng thử lại.'); })
+                    .then(function () {
+                        sending = false;
+                        waitingAI = false;
+                        sendBtn.disabled = false;
+                        if (!ok && !input.value) { input.value = text; autoGrow(); }
+                        loadMessages(true);
+                        input.focus();
+                    });
+            }
+
+            function sendFile(file) {
+                if (sending) return;
+
+                if (file.size > MAX_FILE_MB * 1024 * 1024) {
+                    showError('Tệp quá lớn (tối đa ' + MAX_FILE_MB + ' MB).');
+                    return;
+                }
+
+                sending = true;
+                sendBtn.disabled = true;
+
+                var fd = new FormData();
+                fd.append('file', file);
+                fd.append('__RequestVerificationToken', getToken());
+
+                fetch(URL_MEDIA, { method: 'POST', credentials: 'same-origin', body: fd })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (!data || !data.success) showError('Không gửi được tệp. Vui lòng thử lại.');
+                    })
+                    .catch(function () { showError('Không gửi được tệp. Vui lòng thử lại.'); })
+                    .then(function () {
+                        sending = false;
+                        sendBtn.disabled = false;
+                        fileInput.value = '';
+                        loadMessages(true);
+                    });
+            }
+
+            /* ---------- Sự kiện ---------- */
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                sendMessage();
+            });
+
+            // Enter = gửi, Shift + Enter = xuống dòng
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            input.addEventListener('input', autoGrow);
+
+            body.addEventListener('click', function (e) {
+                var t = e.target;
+                if (t && t.classList && t.classList.contains('cs-chip')) {
+                    sendMessage(t.getAttribute('data-q'));
+                }
+            });
+
+            fileInput.addEventListener('change', function () {
+                if (fileInput.files && fileInput.files.length > 0) sendFile(fileInput.files[0]);
+            });
+
+            loadMessages(true);
+            setInterval(function () {
+                if (!document.hidden) loadMessages(false);
+            }, 3000);
+        })();
+    </script>
+}

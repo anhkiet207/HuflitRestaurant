@@ -1,0 +1,79 @@
+﻿@model IEnumerable<HuflitRestaurant.Models.Order>
+
+@{
+    ViewBag.Title = "Quản lý đơn hàng - HUFLIT RESTAURANT";
+}
+
+<div class="admin-orders-container">
+    <h1 class="admin-title-main">QUẢN LÝ ĐƠN HÀNG</h1>
+
+    <div class="admin-action-bar">
+        <div style="display: flex; gap: 10px;">
+            <a href="@Url.Action("Product", "Admin")" class="btn-admin-menu">Thực đơn món ăn</a>
+            <a href="@Url.Action("CreateProduct", "Admin")" class="btn-admin-menu" style="background-color: #10B981;">+ Thêm món mới</a>
+        </div>
+
+        <!-- Nút Reset đơn hàng cho Admin -->
+        @using (Html.BeginForm("ResetOrders", "Admin", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-admin-reset" onclick="return confirm('Bạn có chắc chắn muốn xóa tất cả đơn hàng hiện tại?');">
+                &#215; Reset danh sách đơn hàng
+            </button>
+        }
+    </div>
+
+    @if (TempData["ResetSuccess"] != null)
+    {
+        <div class="admin-alert-success">
+            &#10004; @TempData["ResetSuccess"]
+        </div>
+    }
+
+    <div class="admin-orders-table-wrapper">
+        <table class="admin-orders-table">
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th style="text-align: center;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>#@item.Id</strong></td>
+                            <td>@(item.User != null ? item.User.HoTen : "Khách vãng lai") (@item.SoDienThoaiGiao)</td>
+                            <td>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><strong>@item.TongTien.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) đ</strong></td>
+                            <td>
+                                <select class="status-select-custom">
+                                    <option value="Pending" @(item.TrangThai == "Pending" ? "selected" : "")>Chờ xử lý</option>
+                                    <option value="Completed" @(item.TrangThai == "Completed" ? "selected" : "")>Đã hoàn thành</option>
+                                    <option value="Cancelled" @(item.TrangThai == "Cancelled" ? "selected" : "")>Đã hủy</option>
+                                </select>
+                            </td>
+                            <td style="text-align: center;">
+                                <a href="@Url.Action("OrderDetail", "Account", new { id = item.Id })" class="btn-view-order">Xem</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 30px; color: #6B7280;">
+                            Chưa có đơn hàng nào trong hệ thống.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

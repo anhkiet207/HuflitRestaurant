@@ -1,0 +1,77 @@
+﻿@{
+    ViewBag.Title = "Chi tiết đơn hàng - HUFLIT RESTAURANT";
+    var order = ViewBag.Order as HuflitRestaurant.Models.Order;
+    var orderItems = ViewBag.OrderItems as List<HuflitRestaurant.Models.OrderItem>;
+}
+
+<div class="order-detail-container">
+    @if (order != null)
+    {
+        <div class="order-detail-header">
+            <h1 class="order-detail-title">Chi tiết đơn hàng #@order.Id</h1>
+            <a href="@Url.Action("Orders", "Admin")" class="order-detail-back-link">&larr; Quay lại</a>
+        </div>
+
+        <!-- Thông tin đơn hàng -->
+        <div class="order-info-card">
+            <div class="order-info-grid">
+                <p><strong>Ngày đặt:</strong> @order.NgayDat.ToString("dd/MM/yyyy HH:mm")</p>
+                <p><strong>Trạng thái:</strong> <span class="order-status-text">@order.TrangThai</span></p>
+                <p><strong>Địa chỉ giao:</strong> @(string.IsNullOrEmpty(order.DiaChiGiao) ? "Chưa nhập" : order.DiaChiGiao)</p>
+                <p><strong>Số điện thoại:</strong> @order.SoDienThoaiGiao</p>
+                <p class="order-info-full"><strong>Ghi chú:</strong> @order.GhiChu</p>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách món ăn đã đặt -->
+        <div class="order-items-table-wrapper">
+            <table class="order-items-table">
+                <thead>
+                    <tr>
+                        <th>Tên món</th>
+                        <th class="text-center">Số lượng</th>
+                        <th class="text-right">Đơn giá</th>
+                        <th class="text-right">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (orderItems != null && orderItems.Any())
+                    {
+                        foreach (var item in orderItems)
+                        {
+                            <tr>
+                                <td class="order-item-name-cell">@item.TenMon</td>
+                                <td class="text-center">@item.SoLuong</td>
+                                <td class="text-right">@item.DonGia.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) đ</td>
+                                <td class="text-right font-bold">@((item.DonGia * item.SoLuong).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN"))) đ</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center" style="padding: 20px; color: #6B7280;">
+                                Không tìm thấy món ăn trong đơn hàng này.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="order-summary-row">
+                        <td colspan="3" class="order-total-label-cell">Tổng cộng:</td>
+                        <td class="order-total-value-cell">
+                            @order.TongTien.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) đ
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="order-info-card text-center" style="padding: 40px;">
+            <p style="font-size: 16px; color: #6B7280;">Đơn hàng không tồn tại hoặc đã bị xóa.</p>
+            <a href="@Url.Action("Orders", "Admin")" class="btn-admin-menu" style="margin-top: 15px;">Quay lại danh sách đơn hàng</a>
+        </div>
+    }
+</div>

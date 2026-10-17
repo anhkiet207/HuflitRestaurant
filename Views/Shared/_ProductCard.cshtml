@@ -1,0 +1,13 @@
+﻿@model HuflitRestaurant.Models.Product
+
+<div class="product-card">
+    <div class="product-img">
+        <img src="@Model.HinhAnh" alt="@Model.Ten" onerror="this.style.display='none'" />
+    </div>
+    <div class="product-body">
+        <h3 class="product-name">@Model.Ten</h3>
+        <p class="product-desc">@Model.MoTa</p>
+        <div class="product-price">@(Model.Gia.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))) ₫</div>
+        <button type="button" class="btn-red btn-block btn-add-cart" data-id="@Model.Id">Thêm vào giỏ hàng</button>
+    </div>
+</div>

@@ -1,0 +1,57 @@
+﻿
+@model HuflitRestaurant.Models.UserProfileViewModel
+@{
+    ViewBag.Title = "Tài khoản của tôi";
+}
+
+<div class="container-site section">
+    <h1 class="section-title">THÔNG TIN TÀI KHOẢN</h1>
+
+    <div class="checkout-grid">
+        <div class="checkout-form-box">
+            <h3>Thông tin cá nhân</h3>
+            <p><strong>Họ và tên:</strong> @Model.User.HoTen</p>
+            <p><strong>Email:</strong> @Model.User.Email</p>
+            <p><strong>Số điện thoại:</strong> @Model.User.SoDienThoai</p>
+            <p><strong>Ngày tham gia:</strong> @Model.User.NgayTao.ToString("dd/MM/yyyy")</p>
+        </div>
+
+        <div class="checkout-order-summary" style="width: 100%;">
+            <h3>Lịch sử đơn hàng</h3>
+            @if (Model.Orders.Count == 0)
+            {
+                <p>Bạn chưa có đơn hàng nào.</p>
+            }
+            else
+            {
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.Orders)
+                        {
+                            <tr>
+                                <td>#@order.Id</td>
+                                <td>@order.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="cart-total-price">@(order.TongTien.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))) ₫</td>
+                                <td>
+                                    <span class="badge">@order.TrangThai</span>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("OrderDetail", "Account", new { id = order.Id })" class="btn-red" style="padding: 4px 8px; font-size: 12px;">Xem</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

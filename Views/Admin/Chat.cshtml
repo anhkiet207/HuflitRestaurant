@@ -1,0 +1,153 @@
+﻿@{
+    ViewBag.Title = "Hỗ Trợ Quản Lý AI - HUFLIT RESTAURANT";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<div class="cs-page">
+    <div class="cs-card">
+
+        <!-- HEADER -->
+        <div class="cs-header">
+            <div class="cs-header-left">
+                <div class="cs-avatar">HF</div>
+                <div>
+                    <div class="cs-title">Trợ lý AI Quản Lý</div>
+                    <div class="cs-status">Đang hoạt động (Chế độ Admin)</div>
+                </div>
+            </div>
+            <button class="cs-header-action" type="button" title="Gọi điện">
+                <i class="fa fa-phone"></i>
+            </button>
+        </div>
+
+        <!-- NỘI DUNG CHAT -->
+        <div class="cs-body" id="chatBody">
+            <div class="cs-msg admin">
+                <div class="cs-msg-avatar">HF</div>
+                <div class="cs-msg-col">
+                    <div class="cs-bubble">
+                        <b>Xin chào Quản trị viên!</b><br />
+                        Tôi là Trợ lý AI hỗ trợ Ban Quản lý <b>HUFLIT RESTAURANT</b>. Tôi có thể giúp gì cho bạn hôm nay?
+                        <ul style="padding-left: 18px; margin: 8px 0 4px 0; font-size: 13.5px;">
+                            <li>Tra cứu thực đơn & giá món ăn</li>
+                            <li>Soạn thảo chương trình ưu đãi / sự kiện</li>
+                            <li>Gợi ý phản hồi đánh giá của khách hàng</li>
+                        </ul>
+                    </div>
+                    <span class="cs-time">@DateTime.Now.ToString("HH:mm")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER NHẬP TIN NHẮN -->
+        <div class="cs-input-bar">
+            <button class="cs-icon-btn" type="button" title="Gửi ảnh">
+                <i class="fa-regular fa-image"></i>
+            </button>
+            <textarea id="adminInput" class="cs-input" placeholder="Nhập câu hỏi quản lý..." rows="1"></textarea>
+            <button class="cs-send" id="btnSend" onclick="sendAdminMessage()">
+                <i class="fa fa-paper-plane"></i>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+        function sendAdminMessage() {
+            const input = document.getElementById("adminInput");
+            const text = input.value.trim();
+            if (!text) return;
+
+            const chatBody = document.getElementById("chatBody");
+            const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // 1. Hiển thị tin nhắn từ Admin (Bên phải, màu đỏ)
+            const userHtml = `
+                <div class="cs-msg user">
+                    <div class="cs-msg-col">
+                        <div class="cs-bubble">${escapeHtml(text)}</div>
+                        <span class="cs-time">${timeNow}</span>
+                    </div>
+                </div>
+            `;
+            chatBody.insertAdjacentHTML('beforeend', userHtml);
+            input.value = "";
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // 2. Hiển thị hiệu ứng 3 chấm AI đang gõ
+            const loadingId = "loading-" + Date.now();
+            const loadingHtml = `
+                <div class="cs-msg admin" id="${loadingId}">
+                    <div class="cs-msg-avatar">HF</div>
+                    <div class="cs-msg-col">
+                        <div class="cs-bubble cs-typing">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatBody.insertAdjacentHTML('beforeend', loadingHtml);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // 3. Gửi tin nhắn về AdminController
+            fetch('/Admin/SendAdminChatMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'message=' + encodeURIComponent(text)
+            })
+            .then(res => res.json())
+            .then(data => {
+                const loadingElem = document.getElementById(loadingId);
+                if (loadingElem) loadingElem.remove();
+
+                let replyText = data.Success ? data.Reply : ("Lỗi: " + (data.ErrorMessage || "Không thể xử lý."));
+                replyText = replyText.replace(/\n/g, "<br>");
+
+                const aiHtml = `
+                    <div class="cs-msg admin">
+                        <div class="cs-msg-avatar">HF</div>
+                        <div class="cs-msg-col">
+                            <div class="cs-bubble">${replyText}</div>
+                            <span class="cs-time">${timeNow}</span>
+                        </div>
+                    </div>
+                `;
+                chatBody.insertAdjacentHTML('beforeend', aiHtml);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            })
+            .catch(err => {
+                const loadingElem = document.getElementById(loadingId);
+                if (loadingElem) loadingElem.remove();
+
+                const errorHtml = `
+                    <div class="cs-msg admin">
+                        <div class="cs-msg-avatar">HF</div>
+                        <div class="cs-msg-col">
+                            <div class="cs-bubble" style="color: #991B1B; background: #FEE2E2;">
+                                Không thể kết nối đến máy chủ.
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatBody.insertAdjacentHTML('beforeend', errorHtml);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            });
+        }
+
+        // Nhấn Enter để gửi (Shift + Enter để xuống dòng)
+        document.getElementById("adminInput").addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendAdminMessage();
+            }
+        });
+
+        function escapeHtml(string) {
+            return String(string).replace(/[&<>"']/g, function (s) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s];
+            });
+        }
+</script>

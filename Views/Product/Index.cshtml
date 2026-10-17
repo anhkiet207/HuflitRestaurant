@@ -1,0 +1,51 @@
+﻿
+@model HuflitRestaurant.Models.ProductViewModel
+@{
+    ViewBag.Title = "Thực đơn";
+}
+
+<div class="container-site section">
+    <h1 class="section-title">THỰC ĐƠN MÓN HÀN</h1>
+
+    <!-- Thanh tìm kiếm & lọc danh mục -->
+    <div class="menu-filter-bar">
+        <form method="get" action="@Url.Action("Index", "Product")" class="search-form">
+            @if (Model.SelectedCategoryId.HasValue)
+            {
+                <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" />
+            }
+            <input type="text" name="keyword" value="@Model.SearchKeyword" placeholder="Tìm kiếm món ăn..." class="form-input" />
+            <button type="submit" class="btn-red">Tìm</button>
+        </form>
+
+        <div class="category-tabs">
+            <a href="@Url.Action("Index", "Product")" class="tab-item @(Model.SelectedCategoryId == null ? "active" : "")">
+                Tất cả (@Model.Products.Count)
+            </a>
+            @foreach (var c in Model.Categories)
+            {
+                <a href="@Url.Action("Index", "Product", new { categoryId = c.Id })"
+                   class="tab-item @(Model.SelectedCategoryId == c.Id ? "active" : "")">
+                    @c.Ten
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Lưới danh sách món ăn -->
+    @if (Model.Products.Count == 0)
+    {
+        <div class="no-products">
+            <p>Không tìm thấy món ăn phù hợp.</p>
+        </div>
+    }
+    else
+    {
+        <div class="product-grid">
+            @foreach (var p in Model.Products)
+            {
+                @Html.Partial("_ProductCard", p)
+            }
+        </div>
+    }
+</div>

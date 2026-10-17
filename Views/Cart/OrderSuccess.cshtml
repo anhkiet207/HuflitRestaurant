@@ -1,0 +1,63 @@
+﻿@model HuflitRestaurant.Models.Order
+@{
+    ViewBag.Title = "Đặt hàng thành công";
+    var items = ViewBag.Items as List<HuflitRestaurant.Models.OrderItem>;
+    bool isBank = ViewBag.IsBank != null && (bool)ViewBag.IsBank;
+    var vn = new System.Globalization.CultureInfo("vi-VN");
+}
+
+<div class="os-wrap">
+    <div class="os-card">
+        <div class="os-check">
+            <svg viewBox="0 0 52 52" width="64" height="64">
+                <circle class="os-check-circle" cx="26" cy="26" r="24" fill="none" />
+                <path class="os-check-mark" fill="none" d="M14 27l8 8 16-17" />
+            </svg>
+        </div>
+
+        <h1 class="os-title">Đặt hàng thành công!</h1>
+        <p class="os-sub">
+            @if (isBank)
+            {
+                <text>Cảm ơn bạn! Nhà hàng sẽ xác nhận đơn ngay khi nhận được khoản chuyển khoản của bạn.</text>
+            }
+            else
+            {
+                <text>Cảm ơn bạn! Nhà hàng sẽ sớm liên hệ xác nhận và giao món đến bạn. Bạn thanh toán khi nhận hàng.</text>
+            }
+        </p>
+
+        <div class="os-info">
+            <div><span>Mã đơn hàng</span><strong>#@Model.Id</strong></div>
+            <div><span>Thời gian</span><strong>@Model.NgayDat.ToString("HH:mm dd/MM/yyyy")</strong></div>
+            <div><span>Thanh toán</span><strong>@(isBank ? "Chuyển khoản / QR" : "Khi nhận hàng (COD)")</strong></div>
+            <div><span>Giao đến</span><strong>@Model.DiaChiGiao</strong></div>
+            @if (!string.IsNullOrEmpty(Model.SoDienThoaiGiao))
+            {
+                <div><span>Số điện thoại</span><strong>@Model.SoDienThoaiGiao</strong></div>
+            }
+        </div>
+
+        @if (items != null && items.Any())
+        {
+            <div class="os-items">
+                @foreach (var it in items)
+                {
+                    <div class="os-item">
+                        <span>@it.TenMon <em>x@(it.SoLuong)</em></span>
+                        <span>@((it.DonGia * it.SoLuong).ToString("N0", vn)) ₫</span>
+                    </div>
+                }
+                <div class="os-total">
+                    <span>Tổng cộng</span>
+                    <span>@Model.TongTien.ToString("N0", vn) ₫</span>
+                </div>
+            </div>
+        }
+
+        <div class="os-actions">
+            <a class="btn-red" href="@Url.Action("OrderDetail", "Account", new { id = Model.Id })">Xem chi tiết đơn</a>
+            <a class="btn-outline" href="@Url.Action("Index", "Product")">Tiếp tục mua sắm</a>
+        </div>
+    </div>
+</div>

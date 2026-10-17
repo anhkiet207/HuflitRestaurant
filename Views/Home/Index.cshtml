@@ -1,0 +1,183 @@
+﻿@model HuflitRestaurant.Models.HomeViewModel
+@{
+    ViewBag.Title = "Trang chủ - HUFLIT RESTAURANT";
+}
+
+<style>
+    /* Hero Banner */
+    .hero-banner-custom {
+        position: relative;
+        width: 100%;
+        height: 380px;
+        background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('/Content/images/hero.jpg') center 30%/cover no-repeat;
+        background-color: #1a1a1a;
+        image-rendering: -webkit-optimize-contrast;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #ffffff;
+        margin-bottom: 40px;
+    }
+
+        .hero-banner-custom h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+    .btn-hero-custom {
+        background-color: #E53935;
+        color: #ffffff !important;
+        padding: 12px 28px;
+        font-weight: 700;
+        font-size: 14px;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.2s;
+    }
+
+        .btn-hero-custom:hover {
+            background-color: #c62828;
+        }
+
+    /* Category Circles */
+    .category-section-custom {
+        max-width: 1140px;
+        margin: 0 auto 50px auto;
+        padding: 0 15px;
+    }
+
+    .category-grid-custom {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+        flex-wrap: wrap;
+    }
+
+    .category-item-custom {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none !important;
+        color: #333333;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .category-circle-custom {
+        width: 85px;
+        height: 85px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        overflow: hidden;
+        margin-bottom: 10px;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .category-circle-custom img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    /* Section Title */
+    .section-title-custom {
+        text-align: center;
+        font-size: 24px;
+        font-weight: 800;
+        color: #111111;
+        margin-bottom: 35px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Product Grid */
+    .bestseller-container-custom {
+        max-width: 1140px;
+        margin: 0 auto 60px auto;
+        padding: 0 15px;
+    }
+
+    .product-grid-custom {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    @@media (max-width: 992px) {
+        .product-grid-custom {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .product-grid-custom {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- 1. Hero Banner -->
+<div class="hero-banner-custom">
+    <h1>HƯƠNG VỊ HÀN QUỐC ĐÍCH THỰC</h1>
+    <a href="@Url.Action("Index", "Product")" class="btn-hero-custom">XEM THỰC ĐƠN</a>
+</div>
+
+<!-- 2. Category Circles -->
+<div class="category-section-custom">
+    <div class="category-grid-custom">
+        <a href="#" class="category-item-custom">
+            <div class="category-circle-custom">
+                <img src="https://images.unsplash.com/photo-1580651315530-69c8e0026377?w=200" alt="Tokbokki" />
+            </div>
+            <span>Tokbokki</span>
+        </a>
+        <a href="#" class="category-item-custom">
+            <div class="category-circle-custom">
+                <img src="https://images.unsplash.com/photo-1553163147-622ab57be1c7?w=200" alt="Cơm trộn" />
+            </div>
+            <span>Cơm trộn</span>
+        </a>
+        <a href="#" class="category-item-custom">
+            <div class="category-circle-custom">
+                <img src="https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=200" alt="Kimbap" />
+            </div>
+            <span>Kimbap</span>
+        </a>
+        <a href="#" class="category-item-custom">
+            <div class="category-circle-custom">
+                <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=200" alt="Lẩu & Canh" />
+            </div>
+            <span>Lẩu & Canh</span>
+        </a>
+        <a href="#" class="category-item-custom">
+            <div class="category-circle-custom">
+                <img src="https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=200" alt="Gà rán" />
+            </div>
+            <span>Gà rán</span>
+        </a>
+    </div>
+</div>
+
+<!-- 3. Best Sellers -->
+<div class="bestseller-container-custom">
+    <h2 class="section-title-custom">MÓN BÁN CHẠY NHẤT</h2>
+    <div class="product-grid-custom">
+        @if (Model != null && Model.BestSellers != null)
+        {
+            foreach (var item in Model.BestSellers)
+            {
+                @Html.Partial("_ProductCard", item)
+            }
+        }
+    </div>
+</div>

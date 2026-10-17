@@ -1,0 +1,35 @@
+﻿@{
+    ViewBag.Title = "Thanh toán QR - HUFLIT RESTAURANT";
+    decimal tongTien = ViewBag.TongTien != null ? (decimal)ViewBag.TongTien : 40000;
+    string sdt = ViewBag.SoDienThoai != null ? ViewBag.SoDienThoai.ToString() : "0901234567";
+
+    // Link tạo mã VietQR tự động theo số tiền (Thay STK của bạn tại đây)
+    string bankAccount = "0363420862";
+    string bankName = "MBBank";
+    string qrUrl = $"https://img.vietqr.io/image/{bankName}-{bankAccount}-compact2.png?amount={tongTien}&addInfo=HUFLIT%20{sdt}";
+}
+
+<div style="max-width: 500px; margin: 50px auto; padding: 30px; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center;">
+    <h2 style="font-size: 22px; font-weight: 800; color: #111111; margin-bottom: 8px; text-transform: uppercase;">QUÉT MÃ ĐỂ THANH TOÁN</h2>
+    <p style="color: #666666; font-size: 14px; margin-bottom: 20px;">Sử dụng App Ngân hàng, Momo hoặc ZaloPay để quét mã</p>
+
+    <!-- Mã QR -->
+    <div style="padding: 15px; border: 2px dashed #E53935; border-radius: 12px; display: inline-block; background: #FAFAFA; margin-bottom: 20px;">
+        <img src="@qrUrl" alt="Mã QR Thanh Toán" style="width: 240px; height: 240px; object-fit: contain; border-radius: 8px;" />
+    </div>
+
+    <!-- Thông tin chuyển khoản -->
+    <div style="text-align: left; background: #F9FAFB; padding: 16px; border-radius: 8px; font-size: 14px; margin-bottom: 24px; border: 1px solid #E5E7EB;">
+        <p style="margin-bottom: 8px;"><strong>Chủ tài khoản:</strong> HUFLIT RESTAURANT</p>
+        <p style="margin-bottom: 8px;"><strong>Ngân hàng:</strong> MBBank (@bankAccount)</p>
+        <p style="margin-bottom: 8px;"><strong>Số tiền:</strong> <span style="color: #E53935; font-weight: 800; font-size: 16px;">@tongTien.ToString("#,##0", new System.Globalization.CultureInfo("vi-VN")) ₫</span></p>
+        <p style="margin: 0;"><strong>Nội dung chuyển khoản:</strong> <span style="color: #111827; font-weight: 700;">HUFLIT @sdt</span></p>
+    </div>
+
+    <a href="@Url.Action("Index", "Home")" class="btn-red" style="display: block; width: 100%; text-align: center; padding: 13px 0; text-decoration: none; border-radius: 6px; font-weight: 700; background-color: #E53935; color: #ffffff;">
+        XÁC NHẬN ĐÃ THANH TOÁN
+    </a>
+    <div style="text-align:center; margin-top:20px;">
+        <a class="btn-red" href="@Url.Action("OrderSuccess", "Cart", new { id = Session["LastOrderId"], pm = "Bank" })">Tôi đã chuyển khoản</a>
+    </div>
+</div>
