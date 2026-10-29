@@ -11,14 +11,14 @@ namespace HuflitRestaurant.Controllers
     {
         private AppDbContext db = new AppDbContext();
 
-        // GET: Account/Register
-        public ActionResult Register()
+        // GET: Account/Register
+        public ActionResult Register()
         {
             return View();
         }
 
-        // POST: Account/Register
-        [HttpPost]
+        // POST: Account/Register
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Register(RegisterViewModel model)
         {
@@ -37,15 +37,15 @@ namespace HuflitRestaurant.Controllers
                     Email = model.Email,
                     SoDienThoai = model.SoDienThoai,
                     MatKhau = model.MatKhau, // Trong thực tế nên mã hóa Password
-                    VaiTro = "Customer",
+                    VaiTro = "Customer",
                     NgayTao = DateTime.Now
                 };
 
                 db.Users.Add(user);
                 db.SaveChanges();
 
-                // Đăng ký xong tự động đăng nhập
-                Session["UserId"] = user.Id;
+                // Đăng ký xong tự động đăng nhập
+                Session["UserId"] = user.Id;
                 Session["UserName"] = user.HoTen;
                 Session["UserEmail"] = user.Email;
 
@@ -55,15 +55,15 @@ namespace HuflitRestaurant.Controllers
             return View(model);
         }
 
-        // GET: Account/Login
-        public ActionResult Login()
+        // GET: Account/Login
+        public ActionResult Login()
         {
             return View();
         }
 
-        // POST: Account/Login
-        // POST: Account/Login
-        [HttpPost]
+        // POST: Account/Login
+        // POST: Account/Login
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Login(string email, string password)
         {
@@ -76,38 +76,38 @@ namespace HuflitRestaurant.Controllers
             string cleanEmail = email.Trim().ToLower();
             string cleanPassword = password.Trim();
 
-            // Tìm user trong Database
-            var user = db.Users.FirstOrDefault(u => u.Email.Trim().ToLower() == cleanEmail && u.MatKhau == cleanPassword);
+            // Tìm user trong Database
+            var user = db.Users.FirstOrDefault(u => u.Email.Trim().ToLower() == cleanEmail && u.MatKhau == cleanPassword);
 
             if (user != null)
             {
-                // Gán đầy đủ Session
-                Session["UserId"] = user.Id;
+                // Gán đầy đủ Session
+                Session["UserId"] = user.Id;
                 Session["UserName"] = user.HoTen;
                 Session["UserRole"] = user.VaiTro;
 
-                // Nếu là Admin -> Chuyển hướng tới trang Quản lý đơn hàng
-                if (!string.IsNullOrEmpty(user.VaiTro) && user.VaiTro.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                // Nếu là Admin -> Chuyển hướng tới trang Quản lý đơn hàng
+                if (!string.IsNullOrEmpty(user.VaiTro) && user.VaiTro.Equals("Admin", StringComparison.OrdinalIgnoreCase))
                 {
                     return RedirectToAction("Orders", "Admin");
                 }
 
-                // Nếu là Khách hàng -> Chuyển hướng về Trang chủ
-                return RedirectToAction("Index", "Home");
+                // Nếu là Khách hàng -> Chuyển hướng về Trang chủ
+                return RedirectToAction("Index", "Home");
             }
 
             ViewBag.Error = "Email hoặc mật khẩu không chính xác!";
             return View();
         }
-        // GET: Account/Logout
-        public ActionResult Logout()
+        // GET: Account/Logout
+        public ActionResult Logout()
         {
             Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: Account/Profile
-        public ActionResult Profile()
+        // GET: Account/Profile
+        public ActionResult Profile()
         {
             if (Session["UserId"] == null)
             {
@@ -127,16 +127,16 @@ namespace HuflitRestaurant.Controllers
             return View(vm);
         }
 
-        // GET: Account/OrderDetail/5
-        public ActionResult OrderDetail(int? id)
+        // GET: Account/OrderDetail/5
+        public ActionResult OrderDetail(int? id)
         {
             if (id == null)
             {
                 return RedirectToAction("Index", "Home");
             }
 
-            // Lấy thông tin đơn hàng cùng danh sách món ăn chi tiết
-            var order = db.Orders.FirstOrDefault(o => o.Id == id.Value);
+            // Lấy thông tin đơn hàng cùng danh sách món ăn chi tiết
+            var order = db.Orders.FirstOrDefault(o => o.Id == id.Value);
             if (order == null)
             {
                 return HttpNotFound();
@@ -149,22 +149,22 @@ namespace HuflitRestaurant.Controllers
 
             return View();
         }
-        // GET: Account/CustomerSupport
-        public ActionResult CustomerSupport()
+        // GET: Account/CustomerSupport
+        public ActionResult CustomerSupport()
         {
             if (Session["UserId"] == null) return RedirectToAction("Login", "Account");
 
             int userId = (int)Session["UserId"];
             var messages = db.ChatMessages
-                .Where(m => m.UserId == userId)
-                .OrderBy(m => m.CreatedAt)
-                .ToList();
+              .Where(m => m.UserId == userId)
+              .OrderBy(m => m.CreatedAt)
+              .ToList();
 
             return View(messages);
         }
 
-        // POST: Account/SendCustomerSupportMessage
-        [HttpPost]
+        // POST: Account/SendCustomerSupportMessage
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SendCustomerSupportMessage(string message)
         {
@@ -187,33 +187,33 @@ namespace HuflitRestaurant.Controllers
 
             return RedirectToAction("CustomerSupport");
         }
-        // API lấy danh sách tin nhắn dạng JSON cho Khách hàng
-        // API lấy tin nhắn khách hàng
-        [HttpGet]
+        // API lấy danh sách tin nhắn dạng JSON cho Khách hàng
+        // API lấy tin nhắn khách hàng
+        [HttpGet]
         public ActionResult GetCustomerMessagesJson()
         {
             if (Session["UserId"] == null) return Json(new { success = false }, JsonRequestBehavior.AllowGet);
 
             int userId = Convert.ToInt32(Session["UserId"]);
             var messages = db.ChatMessages
-                .Where(m => m.UserId == userId)
-                .OrderBy(m => m.CreatedAt)
-                .ToList()
-                .Select(m => new {
-                    m.Id,
-                    m.SenderRole,
-                    m.Message,
-                    m.MessageType,
-                    m.MediaUrl,
-                    CreatedAt = m.CreatedAt.ToString("HH:mm")
-                })
-                .ToList();
+              .Where(m => m.UserId == userId)
+              .OrderBy(m => m.CreatedAt)
+              .ToList()
+              .Select(m => new {
+                  m.Id,
+                  m.SenderRole,
+                  m.Message,
+                  m.MessageType,
+                  m.MediaUrl,
+                  CreatedAt = m.CreatedAt.ToString("HH:mm")
+              })
+              .ToList();
 
             return Json(new { success = true, messages = messages }, JsonRequestBehavior.AllowGet);
         }
 
-        // API gửi ảnh/video từ Khách hàng
-        [HttpPost]
+        // API gửi ảnh/video từ Khách hàng
+        [HttpPost]
         public ActionResult SendCustomerMediaMessageAjax(System.Web.HttpPostedFileBase file)
         {
             if (Session["UserId"] == null) return Json(new { success = false, message = "Chưa đăng nhập" });
@@ -267,8 +267,8 @@ namespace HuflitRestaurant.Controllers
             {
                 int userId = Convert.ToInt32(Session["UserId"]);
 
-                // 1. Lưu tin nhắn của Khách hàng
-                var userMsg = new ChatMessage
+                // 1. Lưu tin nhắn của Khách hàng
+                var userMsg = new ChatMessage
                 {
                     UserId = userId,
                     SenderRole = "User",
@@ -279,15 +279,15 @@ namespace HuflitRestaurant.Controllers
                 db.ChatMessages.Add(userMsg);
                 db.SaveChanges();
 
-                // 2. Tự động gọi Gemini AI trả lời
-                string aiReply = await AIService.GetAIResponseAsync(message.Trim());
+                // 2. Tự động gọi Gemini AI trả lời
+                string aiReply = await AIService.GetAIResponseAsync(message.Trim());
 
-                // 3. Lưu câu trả lời của AI vào CSDL với tư cách Admin Support
-                var aiMsg = new ChatMessage
+                // 3. Lưu câu trả lời của AI vào CSDL với tư cách Admin Support
+                var aiMsg = new ChatMessage
                 {
                     UserId = userId,
                     SenderRole = "Admin", // Hoặc đặt "AI" nếu muốn phân biệt
-                    Message = aiReply,
+                    Message = aiReply,
                     MessageType = "Text",
                     CreatedAt = DateTime.Now
                 };

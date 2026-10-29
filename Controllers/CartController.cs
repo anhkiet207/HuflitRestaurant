@@ -10,15 +10,15 @@ namespace HuflitRestaurant.Controllers
     {
         private AppDbContext db = new AppDbContext();
 
-        // Danh sách mã giảm giá do Admin cấp
-        private static Dictionary<string, decimal> adminCoupons = new Dictionary<string, decimal>
-        {
-            { "HUFLIT10K", 10000 },
-            { "HUFLIT20K", 20000 },
-            { "HUFLIT50K", 50000 },
-            { "DISCOUNT30", 30000 },
-            {"ANHKIETDEPTRAI",300000}
-        };
+        // Danh sách mã giảm giá do Admin cấp
+        private static Dictionary<string, decimal> adminCoupons = new Dictionary<string, decimal>
+    {
+      { "HUFLIT10K", 10000 },
+      { "HUFLIT20K", 20000 },
+      { "HUFLIT50K", 50000 },
+      { "DISCOUNT30", 30000 },
+      {"ANHKIETDEPTRAI",300000}
+    };
 
         private List<CartItem> GetCart()
         {
@@ -101,7 +101,7 @@ namespace HuflitRestaurant.Controllers
             {
                 cart.Remove(item);
                 UpdateCartCount(); // Cập nhật lại số lượng giỏ hàng ở header
-            }
+            }
             return RedirectToAction("Index");
         }
 
@@ -160,15 +160,15 @@ namespace HuflitRestaurant.Controllers
                 return RedirectToAction("Index");
             }
 
-            // 1. Bắt buộc đăng nhập (trước đây nếu chưa đăng nhập thì đơn bị gán cho UserId = 1)
-            if (Session["UserId"] == null)
+            // 1. Bắt buộc đăng nhập (trước đây nếu chưa đăng nhập thì đơn bị gán cho UserId = 1)
+            if (Session["UserId"] == null)
             {
                 return RedirectToAction("Login", "Account");
             }
             int userId = (int)Session["UserId"];
 
-            // 2. Tính tổng tiền đã trừ giảm giá
-            decimal tamTinh = cart.Sum(x => x.Gia * x.SoLuong);
+            // 2. Tính tổng tiền đã trừ giảm giá
+            decimal tamTinh = cart.Sum(x => x.Gia * x.SoLuong);
             decimal discount = Session["Discount"] != null ? (decimal)Session["Discount"] : 0;
             decimal tongTien = tamTinh - discount;
             if (tongTien < 0) tongTien = 0;
@@ -176,7 +176,7 @@ namespace HuflitRestaurant.Controllers
             bool isBank = (PaymentMethod == "Bank");
             string ptttText = isBank ? "Chuyển khoản / Quét mã QR" : "Thanh toán khi nhận hàng (COD)";
             string safeGhiChu = string.IsNullOrEmpty(GhiChu) ? ("PTTT: " + ptttText) : (GhiChu + " | PTTT: " + ptttText);
-            
+
             // 3. Tạo mới Đơn hàng (Order)
             var order = new Order
             {
@@ -194,8 +194,8 @@ namespace HuflitRestaurant.Controllers
             db.Orders.Add(order);
             db.SaveChanges();
 
-            // 4. Lưu từng món ăn vào Chi tiết đơn hàng (OrderItem)
-            foreach (var item in cart)
+            // 4. Lưu từng món ăn vào Chi tiết đơn hàng (OrderItem)
+            foreach (var item in cart)
             {
                 var orderItem = new OrderItem
                 {
@@ -211,30 +211,30 @@ namespace HuflitRestaurant.Controllers
 
             db.Configuration.ValidateOnSaveEnabled = true;
 
-            // 5. Xóa giỏ hàng và mã giảm giá (dùng chung cho COD và QR)
-            Session["Cart"] = null;
+            // 5. Xóa giỏ hàng và mã giảm giá (dùng chung cho COD và QR)
+            Session["Cart"] = null;
             Session["CartCount"] = 0;
             Session["Discount"] = null;
             Session["CouponCode"] = null;
 
-            // 6a. Chuyển khoản QR -> hiện mã QR trước, sau đó khách bấm "Tôi đã chuyển khoản"
-            if (isBank)
+            // 6a. Chuyển khoản QR -> hiện mã QR trước, sau đó khách bấm "Tôi đã chuyển khoản"
+            if (isBank)
             {
                 TempData["TongTien"] = tongTien;
                 TempData["SoDienThoai"] = SoDienThoai;
                 TempData["OrderId"] = order.Id;
                 Session["LastOrderId"] = order.Id; // để nút "Tôi đã chuyển khoản" luôn lấy được mã đơn
 
-                return RedirectToAction("PaymentQR");
+                return RedirectToAction("PaymentQR");
             }
 
-            // 6b. COD -> sang thẳng trang Đặt hàng thành công
-            return RedirectToAction("OrderSuccess", new { id = order.Id, pm = "COD" });
+            // 6b. COD -> sang thẳng trang Đặt hàng thành công
+            return RedirectToAction("OrderSuccess", new { id = order.Id, pm = "COD" });
         }
 
-        // GET: Cart/OrderSuccess/5
-        // GET: Cart/OrderSuccess/5
-        public ActionResult OrderSuccess(int? id, string pm)
+        // GET: Cart/OrderSuccess/5
+        // GET: Cart/OrderSuccess/5
+        public ActionResult OrderSuccess(int? id, string pm)
         {
             if (Session["UserId"] == null)
             {
@@ -242,8 +242,8 @@ namespace HuflitRestaurant.Controllers
             }
             int userId = (int)Session["UserId"];
 
-            // Lấy mã đơn: ưu tiên trên địa chỉ, nếu không có thì dùng đơn vừa đặt trong Session
-            int orderId;
+            // Lấy mã đơn: ưu tiên trên địa chỉ, nếu không có thì dùng đơn vừa đặt trong Session
+            int orderId;
             if (id.HasValue)
             {
                 orderId = id.Value;
@@ -257,8 +257,8 @@ namespace HuflitRestaurant.Controllers
                 return RedirectToAction("Profile", "Account");
             }
 
-            // Chỉ chủ đơn hàng mới xem được trang này
-            var order = db.Orders.FirstOrDefault(o => o.Id == orderId && o.UserId == userId);
+            // Chỉ chủ đơn hàng mới xem được trang này
+            var order = db.Orders.FirstOrDefault(o => o.Id == orderId && o.UserId == userId);
             if (order == null)
             {
                 return HttpNotFound();
@@ -280,8 +280,8 @@ namespace HuflitRestaurant.Controllers
             string soDienThoai = TempData["SoDienThoai"]?.ToString() ?? "";
             int orderId = TempData["OrderId"] != null ? (int)TempData["OrderId"] : 0;
 
-            // Cấu hình tài khoản ngân hàng VietQR
-            string bankId = "MB";
+            // Cấu hình tài khoản ngân hàng VietQR
+            string bankId = "MB";
             string accountNo = "0363420862";
             string accountName = "NGUYEN ANH KIET";
             string addInfo = $"HUFLIT HD{orderId} {soDienThoai}";

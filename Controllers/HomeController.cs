@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Web.Mvc;
 using HuflitRestaurant.Models;
-
 namespace HuflitRestaurant.Controllers
 {
     public class HomeController : Controller

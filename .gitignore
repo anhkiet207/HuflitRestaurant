@@ -20,3 +20,4 @@ packages/
 Thumbs.dbsecrets.config
 Thumbs.db
 secrets.config
+connections.config

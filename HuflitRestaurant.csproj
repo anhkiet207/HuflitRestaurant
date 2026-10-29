@@ -53,6 +53,9 @@
       <HintPath>packages\EntityFramework.6.6.0-preview1-final\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Web.Infrastructure.2.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -74,10 +77,6 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.EnterpriseServices" />
-    <Reference Include="Microsoft.Web.Infrastructure, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>packages\Microsoft.Web.Infrastructure.2.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net.Http">
     </Reference>
     <Reference Include="System.Net.Http.WebRequest">
@@ -159,6 +158,10 @@
     <Compile Include="Migrations\202610170623449_SyncModelChanges.Designer.cs">
       <DependentUpon>202610170623449_SyncModelChanges.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202610171217588_SyncPendingChanges.cs" />
+    <Compile Include="Migrations\202610171217588_SyncPendingChanges.Designer.cs">
+      <DependentUpon>202610171217588_SyncPendingChanges.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Address.cs" />
     <Compile Include="Models\AppDbContext.cs" />
@@ -197,6 +200,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Content\images\bachiheo.jpg" />
     <Content Include="Content\images\bibimbap.jpg" />
     <Content Include="Content\images\Budae-Jjigae.jpg" />
     <Content Include="Content\images\bulgogi.jpg" />
@@ -225,6 +229,15 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="connections.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Properties\PublishProfiles\ngkiet1000gmail-001-site1 - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\ngkiet1000gmail-001-site1 - FTP1.pubxml" />
+    <None Include="Properties\PublishProfiles\ngkiet1000gmail-001-site1 - FTP2.pubxml" />
+    <None Include="Properties\PublishProfiles\ngkiet1000gmail-001-site1 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\ngkiet1000gmail-001-site1 - Web Deploy1.pubxml" />
+    <None Include="Properties\PublishProfiles\ngkiet1000gmail-001-site1 - Web Deploy2.pubxml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -266,6 +279,7 @@
     <Content Include="Views\Account\CustomerSupport.cshtml" />
     <Content Include="Views\Cart\OrderSuccess.cshtml" />
     <Content Include="Views\Admin\Chat.cshtml" />
+    <Content Include="secrets.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -315,6 +329,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202610170623449_SyncModelChanges.resx">
       <DependentUpon>202610170623449_SyncModelChanges.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202610171217588_SyncPendingChanges.resx">
+      <DependentUpon>202610171217588_SyncPendingChanges.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

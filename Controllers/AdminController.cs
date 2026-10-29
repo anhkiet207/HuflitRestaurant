@@ -28,22 +28,22 @@ namespace HuflitRestaurant.Controllers
             return user != null && user.VaiTro == "Admin";
         }
 
-        // Hàm hỗ trợ tự động đọc tên Tên/Name từ Model bằng Reflection (Chống 100% lỗi CS1061)
-        private string GetEntityName(object entity)
+        // Hàm hỗ trợ tự động đọc tên Tên/Name từ Model bằng Reflection (Chống 100% lỗi CS1061)
+        private string GetEntityName(object entity)
         {
             if (entity == null) return "";
             var props = entity.GetType().GetProperties();
             var nameProp = props.FirstOrDefault(p =>
-                p.Name.Equals("Ten", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.Equals("Name", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.Equals("TenMon", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.Equals("TenMonAn", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.Equals("TenSanPham", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.Equals("TenCategory", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.Equals("TenDanhMuc", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.Equals("TenLoai", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.StartsWith("Ten", StringComparison.OrdinalIgnoreCase) ||
-                p.Name.StartsWith("Name", StringComparison.OrdinalIgnoreCase)
+              p.Name.Equals("Ten", StringComparison.OrdinalIgnoreCase) ||
+              p.Name.Equals("Name", StringComparison.OrdinalIgnoreCase) ||
+              p.Name.Equals("TenMon", StringComparison.OrdinalIgnoreCase) ||
+              p.Name.Equals("TenMonAn", StringComparison.OrdinalIgnoreCase) ||
+              p.Name.Equals("TenSanPham", StringComparison.OrdinalIgnoreCase) ||
+              p.Name.Equals("TenCategory", StringComparison.OrdinalIgnoreCase) ||
+              p.Name.Equals("TenDanhMuc", StringComparison.OrdinalIgnoreCase) ||
+              p.Name.Equals("TenLoai", StringComparison.OrdinalIgnoreCase) ||
+              p.Name.StartsWith("Ten", StringComparison.OrdinalIgnoreCase) ||
+              p.Name.StartsWith("Name", StringComparison.OrdinalIgnoreCase)
             );
 
             if (nameProp != null)
@@ -54,8 +54,8 @@ namespace HuflitRestaurant.Controllers
             return "";
         }
 
-        // GET: Admin/Orders
-        public ActionResult Orders()
+        // GET: Admin/Orders
+        public ActionResult Orders()
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
@@ -63,8 +63,8 @@ namespace HuflitRestaurant.Controllers
             return View(orders);
         }
 
-        // POST: Admin/UpdateOrderStatus
-        [HttpPost]
+        // POST: Admin/UpdateOrderStatus
+        [HttpPost]
         public ActionResult UpdateOrderStatus(int id, string status)
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
@@ -78,8 +78,8 @@ namespace HuflitRestaurant.Controllers
             return RedirectToAction("Orders");
         }
 
-        // POST: Admin/ResetOrders
-        [HttpPost]
+        // POST: Admin/ResetOrders
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult ResetOrders()
         {
@@ -97,8 +97,8 @@ namespace HuflitRestaurant.Controllers
             return RedirectToAction("Orders");
         }
 
-        // GET: Admin/Product
-        public ActionResult Product()
+        // GET: Admin/Product
+        public ActionResult Product()
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
@@ -111,8 +111,8 @@ namespace HuflitRestaurant.Controllers
             return View("Products", products);
         }
 
-        // GET: Admin/Products
-        public ActionResult Products()
+        // GET: Admin/Products
+        public ActionResult Products()
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
@@ -125,8 +125,8 @@ namespace HuflitRestaurant.Controllers
             return View("Product", products);
         }
 
-        // GET: Admin/CreateProduct
-        [HttpGet]
+        // GET: Admin/CreateProduct
+        [HttpGet]
         public ActionResult CreateProduct()
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
@@ -135,8 +135,8 @@ namespace HuflitRestaurant.Controllers
             return View();
         }
 
-        // POST: Admin/CreateProduct
-        [HttpPost]
+        // POST: Admin/CreateProduct
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult CreateProduct(Product product)
         {
@@ -163,8 +163,8 @@ namespace HuflitRestaurant.Controllers
             return View(product);
         }
 
-        // POST: Admin/DeleteProduct/5
-        [HttpPost]
+        // POST: Admin/DeleteProduct/5
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteProduct(int id)
         {
@@ -191,16 +191,16 @@ namespace HuflitRestaurant.Controllers
             return RedirectToAction("Product");
         }
 
-        // GET: Admin/Chat
-        [HttpGet]
+        // GET: Admin/Chat
+        [HttpGet]
         public ActionResult Chat()
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
             return View();
         }
 
-        // POST: Admin/SendAdminChatMessage
-        [HttpPost]
+        // POST: Admin/SendAdminChatMessage
+        [HttpPost]
         public async Task<JsonResult> SendAdminChatMessage(string message)
         {
             if (!IsAdmin())
@@ -226,8 +226,8 @@ namespace HuflitRestaurant.Controllers
                     return Json(new { Success = false, ErrorMessage = "Chưa cấu hình GeminiAPIKey trong web.config!" });
                 }
 
-                // Lấy dữ liệu thực đơn thực tế từ Database (Tự động nhận diện tên thuộc tính qua GetEntityName)
-                var categories = db.Categories.ToList();
+                // Lấy dữ liệu thực đơn thực tế từ Database (Tự động nhận diện tên thuộc tính qua GetEntityName)
+                var categories = db.Categories.ToList();
                 var activeProducts = db.Products.Where(p => p.DangBan).ToList();
 
                 StringBuilder menuBuilder = new StringBuilder();
@@ -250,31 +250,31 @@ namespace HuflitRestaurant.Controllers
                 string apiEndpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
 
                 string adminSystemPrompt = "Bạn là Trợ lý AI chuyên nghiệp hỗ trợ Ban Quản lý / Admin của HUFLIT RESTAURANT, nhà hàng món ăn Hàn Quốc.\n" +
-                                            "Nhiệm vụ: Hỗ trợ Admin giải đáp quy trình vận hành, tư vấn thực đơn, soạn thảo nội dung ưu đãi, hoặc gợi ý câu trả lời đánh giá khách hàng.\n" +
-                                            "Yêu cầu: Trả lời thân thiện, lịch sự, ngắn gọn (dưới 150 từ), trình bày rõ ràng, phân đoạn xuống dòng hợp lý.\n\n" +
-                                            "Thông tin nhà hàng:\n" +
-                                            "- Địa chỉ: 123 Đường ABC, Quận X, TP. Hồ Chí Minh.\n" +
-                                            "- Hotline: 036 342 0862\n" +
-                                            "- Giờ mở cửa: 08:00 - 22:00 hằng ngày.\n" +
-                                            "- Nhận hàng: Giao tận nơi hoặc đến lấy tại quán.\n" +
-                                            "- Thanh toán: COD, MoMo, ZaloPay, chuyển khoản (mã QR).\n\n" +
-                                            "Thực đơn hiện có trong cơ sở dữ liệu:\n" + menu + "\n\n" +
-                                            "Quy tắc: Chỉ tư vấn dựa trên thông tin thực đơn ở trên. Tuyệt đối không tự bịa ra món ăn, giá bán hay khuyến mãi không có trong danh sách.";
+                              "Nhiệm vụ: Hỗ trợ Admin giải đáp quy trình vận hành, tư vấn thực đơn, soạn thảo nội dung ưu đãi, hoặc gợi ý câu trả lời đánh giá khách hàng.\n" +
+                              "Yêu cầu: Trả lời thân thiện, lịch sự, ngắn gọn (dưới 150 từ), trình bày rõ ràng, phân đoạn xuống dòng hợp lý.\n\n" +
+                              "Thông tin nhà hàng:\n" +
+                              "- Địa chỉ: 123 Đường ABC, Quận X, TP. Hồ Chí Minh.\n" +
+                              "- Hotline: 036 342 0862\n" +
+                              "- Giờ mở cửa: 08:00 - 22:00 hằng ngày.\n" +
+                              "- Nhận hàng: Giao tận nơi hoặc đến lấy tại quán.\n" +
+                              "- Thanh toán: COD, MoMo, ZaloPay, chuyển khoản (mã QR).\n\n" +
+                              "Thực đơn hiện có trong cơ sở dữ liệu:\n" + menu + "\n\n" +
+                              "Quy tắc: Chỉ tư vấn dựa trên thông tin thực đơn ở trên. Tuyệt đối không tự bịa ra món ăn, giá bán hay khuyến mãi không có trong danh sách.";
 
                 using (var httpClient = new HttpClient())
                 {
                     var requestData = new
                     {
                         contents = new[]
-                        {
-                            new
-                            {
-                                parts = new[]
-                                {
-                                    new { text = $"{adminSystemPrompt}\n\nLệnh/Câu hỏi từ Admin: {message}" }
-                                }
-                            }
-                        }
+                      {
+              new
+              {
+                parts = new[]
+                {
+                  new { text = $"{adminSystemPrompt}\n\nLệnh/Câu hỏi từ Admin: {message}" }
+                }
+              }
+            }
                     };
 
                     var content = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json");
@@ -307,8 +307,8 @@ namespace HuflitRestaurant.Controllers
             }
         }
 
-        // POST: Admin/SendChatMessage
-        [HttpPost]
+        // POST: Admin/SendChatMessage
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SendChatMessage(int userId, string message)
         {
@@ -331,8 +331,8 @@ namespace HuflitRestaurant.Controllers
             return RedirectToAction("Chat", new { userId = userId });
         }
 
-        // POST: Admin/SendChatMessageAjax
-        [HttpPost]
+        // POST: Admin/SendChatMessageAjax
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SendChatMessageAjax(int userId, string message)
         {
@@ -359,32 +359,32 @@ namespace HuflitRestaurant.Controllers
             return Json(new { success = true });
         }
 
-        // API lấy danh sách tin nhắn dạng JSON cho Admin
-        [HttpGet]
+        // API lấy danh sách tin nhắn dạng JSON cho Admin
+        [HttpGet]
         public ActionResult GetMessagesJson(int userId)
         {
             if (!IsAdmin()) return Json(new { success = false }, JsonRequestBehavior.AllowGet);
 
             var messages = db.ChatMessages
-                .Where(m => m.UserId == userId)
-                .OrderBy(m => m.CreatedAt)
-                .ToList()
-                .Select(m => new
-                {
-                    m.Id,
-                    m.SenderRole,
-                    Message = HttpUtility.HtmlEncode(m.Message),
-                    m.MessageType,
-                    m.MediaUrl,
-                    CreatedAt = m.CreatedAt.ToString("HH:mm")
-                })
-                .ToList();
+              .Where(m => m.UserId == userId)
+              .OrderBy(m => m.CreatedAt)
+              .ToList()
+              .Select(m => new
+              {
+                  m.Id,
+                  m.SenderRole,
+                  Message = HttpUtility.HtmlEncode(m.Message),
+                  m.MessageType,
+                  m.MediaUrl,
+                  CreatedAt = m.CreatedAt.ToString("HH:mm")
+              })
+              .ToList();
 
             return Json(new { success = true, messages = messages }, JsonRequestBehavior.AllowGet);
         }
 
-        // API gửi ảnh/video từ Admin
-        [HttpPost]
+        // API gửi ảnh/video từ Admin
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SendMediaMessageAjax(int userId, HttpPostedFileBase file)
         {

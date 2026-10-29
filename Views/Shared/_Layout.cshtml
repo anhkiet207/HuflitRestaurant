@@ -9,11 +9,95 @@
     <meta name="theme-color" content="#E53935" />
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+
+    <style>
+        /* ===== Menu responsive: nút ☰ trên màn hình nhỏ ===== */
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .nav-toggle {
+            display: none;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            color: #111827;
+        }
+
+        @@media (max-width: 1100px) {
+            .site-header {
+                height: auto !important;
+                min-height: 0 !important;
+            }
+
+            .header-inner {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                height: auto !important;
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+
+            .logo {
+                font-size: 20px !important;
+            }
+
+            .nav-toggle {
+                display: block;
+            }
+
+            .main-nav,
+            .header-user {
+                display: none !important;
+                width: 100%;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 8px;
+                margin: 0 !important;
+            }
+
+            .header-inner.open .main-nav,
+            .header-inner.open .header-user {
+                display: flex !important;
+            }
+
+            .main-nav {
+                margin-top: 10px !important;
+            }
+
+                .main-nav a {
+                    display: block;
+                    padding: 10px 4px;
+                    margin: 0 !important;
+                    border-bottom: 1px solid #e5e7eb;
+                }
+
+            .header-user {
+                padding-bottom: 6px;
+            }
+
+                .header-user a {
+                    display: block;
+                    text-align: center;
+                    padding: 10px 14px;
+                    margin: 0 !important;
+                }
+        }
+    </style>
 </head>
 <body>
     <header class="site-header">
-        <div class="container-site header-inner">
+        <div class="container-site header-inner" id="headerInner">
             <a class="logo" href="@Url.Action("Index", "Home")"><span class="logo-red">HUFLIT</span> RESTAURANT</a>
+
+            <button type="button" class="nav-toggle" id="navToggle" aria-label="Mở menu" aria-expanded="false">&#9776;</button>
 
             <nav class="main-nav">
                 <a href="@Url.Action("Index", "Home")">Trang Chủ</a>
@@ -64,36 +148,48 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    document.addEventListener('click', function (e) {
-                                        var btn = e.target.closest('.btn-add-cart');
-                                        if (btn) {
-                                            e.preventDefault();
-                                            var productId = btn.getAttribute('data-id');
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Nút ☰ mở/đóng menu trên điện thoại
+                    var toggleBtn = document.getElementById('navToggle');
+                    var headerInner = document.getElementById('headerInner');
+                    if (toggleBtn && headerInner) {
+                        toggleBtn.addEventListener('click', function () {
+                            var isOpen = headerInner.classList.toggle('open');
+                            toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                            toggleBtn.innerHTML = isOpen ? '&#10005;' : '&#9776;';
+                        });
+                    }
 
-                                            fetch('/Cart/AddToCart', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/x-www-form-urlencoded',
-                                                },
-                                                body: 'id=' + encodeURIComponent(productId) + '&quantity=1'
-                                            })
-                                            .then(function (res) { return res.json(); })
-                                            .then(function (data) {
-                                                if (data && data.success) {
-                                                    var cartCountElem = document.getElementById('cart-count');
-                                                    if (cartCountElem) {
-                                                        cartCountElem.innerText = data.cartCount;
-                                                    }
-                                                    alert('Đã thêm món vào giỏ hàng thành công!');
-                                                }
-                                            })
-                                            .catch(function () {
-                                                alert('Có lỗi xảy ra, vui lòng thử lại!');
-                                            });
-                                        }
-                                    });
-                                });
+                    // Thêm vào giỏ hàng
+                    document.addEventListener('click', function (e) {
+                        var btn = e.target.closest('.btn-add-cart');
+                        if (btn) {
+                            e.preventDefault();
+                            var productId = btn.getAttribute('data-id');
+
+                            fetch('/Cart/AddToCart', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: 'id=' + encodeURIComponent(productId) + '&quantity=1'
+                            })
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                if (data && data.success) {
+                                    var cartCountElem = document.getElementById('cart-count');
+                                    if (cartCountElem) {
+                                        cartCountElem.innerText = data.cartCount;
+                                    }
+                                    alert('Đã thêm món vào giỏ hàng thành công!');
+                                }
+                            })
+                            .catch(function () {
+                                alert('Có lỗi xảy ra, vui lòng thử lại!');
+                            });
+                        }
+                    });
+                });
     </script>
     @RenderSection("scripts", required: false)
 </body>
